@@ -1,6 +1,7 @@
 package cn.org.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,6 +73,14 @@ public class ChooseArreaFragment extends Fragment {
     //获取省份的网站
     public static final String URL_IP = "http://guolin.tech/api/china";
 
+
+    /**
+     * 给控件初始化
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -84,6 +93,10 @@ public class ChooseArreaFragment extends Fragment {
         return view;
     }
 
+    /**
+     * 加载数据 和处理点击事件
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -96,6 +109,12 @@ public class ChooseArreaFragment extends Fragment {
                 }else if (currentLevel==LEVEL_CITY){
                     selectedCity = cityList.get(i);
                     queryCounties();
+                }else if (currentLevel==LEVEL_COUNTY){
+                    String weatherId = countyList.get(i).getWeatherId();
+                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -187,10 +206,10 @@ public class ChooseArreaFragment extends Fragment {
      * @param address
      * @param type
      */
-
     private void queryFromServer(String address , final String type){
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
+            //当数据加载出错
             @Override
             public void onFailure(Call call, IOException e) {
                 //通过renOnUiThread()方法回到主线程处理逻辑
@@ -203,6 +222,12 @@ public class ChooseArreaFragment extends Fragment {
                 });
             }
 
+            /**
+             * 数据显示
+             * @param call
+             * @param response
+             * @throws IOException
+             */
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseText = response.body().string();
@@ -234,7 +259,7 @@ public class ChooseArreaFragment extends Fragment {
     }
 
     /**
-     * x显示进度条对话框
+     * 显示进度条对话框
      */
     private void showProgressDialog(){
         if (progressDialog == null){
